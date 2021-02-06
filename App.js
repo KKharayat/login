@@ -1,21 +1,31 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React from "react";
+import Router from "./src/Router";
+import ReduxThunk from "redux-thunk";
+import reducers from "./src/reducers/index";
+import firebase from "firebase";
+import { Provider } from "react-redux";
+import { createStore, applyMiddleware } from "redux";
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
+class App extends React.Component {
+  componentDidMount() {
+    firebase.initializeApp({
+      apiKey: "AIzaSyC4t4EjkflHmnrh55k3sOr4493zmOy4WZk",
+      authDomain: "authentication-93d94.firebaseapp.com",
+      projectId: "authentication-93d94",
+      storageBucket: "authentication-93d94.appspot.com",
+      messagingSenderId: "975044234504",
+      appId: "1:975044234504:web:ce2ea5b6cd2239b339b0bd",
+      measurementId: "G-J6ET5CF2MD",
+    });
+  }
+  render() {
+    const store = createStore(reducers, {}, applyMiddleware(ReduxThunk));
+    return (
+      <Provider store={store}>
+        <Router />
+      </Provider>
+    );
+  }
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default App;
