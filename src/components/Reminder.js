@@ -7,24 +7,42 @@ import {
   Text,
   Button,
   FlatList,
+  TouchableOpacity,
 } from "react-native";
+import { Feather } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import { connect } from "react-redux";
 import { reminderUpdate, reminderCreate } from "../actions/MainNotes";
 
 class Reminder extends Component {
   state = { reminderlist: [] };
+
   componentDidMount() {
+    const previousReminder = this.state.reminderlist;
     const { currentUser } = firebase.auth();
     firebase
       .database()
       .ref(`/users/${currentUser.uid}/reminder`)
-      .on("value", (snapshot) => {
-        let reminderlist = [];
-        snapshot.forEach((snap) => {
-          reminderlist.push(snap.val());
+      .on("child_added", (snap) => {
+        previousReminder.push({
+          id: snap.key,
+          title: snap.val().title,
+          day: snap.val().day,
         });
-        this.setState({ reminderlist: reminderlist });
+        this.setState({ reminderlist: previousReminder });
+        firebase
+          .database()
+          .ref(`/users/${currentUser.uid}/reminder`)
+          .on("child_removed", (snap) => {
+            for (var i = 0; i < previousReminder.length; i++) {
+              if (previousReminder[i].id === snap.key) {
+                previousReminder.splice(i, 1);
+              }
+            }
+            this.setState({
+              reminderlist: previousReminder,
+            });
+          });
       });
     console.log(this.state.reminderlist);
   }
@@ -32,6 +50,15 @@ class Reminder extends Component {
   onButtonPress = () => {
     const { title, day } = this.props;
     this.props.reminderCreate({ title, day });
+  };
+
+  onDeleteReminder = (id) => {
+    const { currentUser } = firebase.auth();
+    firebase
+      .database()
+      .ref(`/users/${currentUser.uid}/reminder`)
+      .child(id)
+      .remove();
   };
 
   render() {
@@ -65,13 +92,21 @@ class Reminder extends Component {
         </Picker>
         <Button title="Add" onPress={this.onButtonPress} />
         <FlatList
+          keyExtractor={(item) => {
+            item.id;
+          }}
           data={this.state.reminderlist}
           renderItem={({ item }) => {
             return (
-              <View>
+              <View style={styles.view}>
                 <Text style={styles.text}>
                   {item.title} - {item.day}
                 </Text>
+                <TouchableOpacity
+                  onPress={() => this.onDeleteReminder(item.id)}
+                >
+                  <Feather name="trash" size={20} color="black" />
+                </TouchableOpacity>
               </View>
             );
           }}
@@ -96,6 +131,13 @@ const styles = StyleSheet.create({
   text: {
     marginHorizontal: 10,
     marginVertical: 10,
+  },
+  view: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginHorizontal: 10,
+    marginVertical: 10,
+    alignItems: "center",
   },
 });
 

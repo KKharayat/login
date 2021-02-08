@@ -15,27 +15,49 @@ import { Feather } from "@expo/vector-icons";
 
 class Todo extends Component {
   state = { todolist: [] };
+
   componentDidMount() {
+    const previousTodos = this.state.todolist;
     const { currentUser } = firebase.auth();
     firebase
       .database()
       .ref(`/users/${currentUser.uid}/todos`)
-      .on("value", (snapshot) => {
-        let todolist = [];
-        snapshot.forEach((snap) => {
-          todolist.push(snap.val());
+      .on("child_added", (snap) => {
+        previousTodos.push({
+          id: snap.key,
+          message: snap.val().message,
         });
-        this.setState({ todolist: todolist });
+        this.setState({
+          todolist: previousTodos,
+        });
+        firebase
+          .database()
+          .ref(`/users/${currentUser.uid}/todos`)
+          .on("child_removed", (snap) => {
+            for (var i = 0; i < previousTodos.length; i++) {
+              if (previousTodos[i].id === snap.key) {
+                previousTodos.splice(i, 1);
+              }
+            }
+            this.setState({
+              todolist: previousTodos,
+            });
+          });
       });
-    console.log(this.state.todolist);
   }
-  onDeleteTodo = () => {
+
+  onDeleteTodo = (id) => {
     const { currentUser } = firebase.auth();
-    firebase.database().ref(`/users/${currentUser.uid}/todos`).remove();
+    firebase
+      .database()
+      .ref(`/users/${currentUser.uid}/todos`)
+      .child(id)
+      .remove();
   };
   onTodoChange = (todo) => {
     this.props.changeMessage(todo);
   };
+
   render() {
     return (
       <View>
@@ -54,13 +76,18 @@ class Todo extends Component {
           }}
         />
         <FlatList
+          keyExtractor={(item) => {
+            item.id;
+          }}
           data={this.state.todolist}
           renderItem={({ item }) => {
             console.log(item);
             return (
               <View style={styles.view}>
-                <Text style={{ fontSize: 14, marginBottom: 10 }}>{item}</Text>
-                <TouchableOpacity onPress={() => this.onDeleteTodo()}>
+                <Text style={{ fontSize: 14, marginBottom: 10 }}>
+                  {item.message}
+                </Text>
+                <TouchableOpacity onPress={() => this.onDeleteTodo(item.id)}>
                   <Feather name="trash" size={24} color="black" />
                 </TouchableOpacity>
               </View>

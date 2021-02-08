@@ -30,7 +30,8 @@ export const todoUpload = (message) => {
     firebase
       .database()
       .ref(`/users/${currentUser.uid}/todos`)
-      .push(message)
+      .push()
+      .set({ message: message })
       .then(() => {
         dispatch({ type: TODO_UPLOADED });
       });
@@ -51,7 +52,8 @@ export const noteCreate = ({ title, body }) => {
     firebase
       .database()
       .ref(`/users/${currentUser.uid}/notes`)
-      .push({ title, body })
+      .push()
+      .set({ title, body })
       .then(() => {
         dispatch({ type: NOTES_CREATED });
       });
@@ -85,7 +87,8 @@ export const reminderCreate = ({ title, day }) => {
     firebase
       .database()
       .ref(`/users/${currentUser.uid}/reminder`)
-      .push({ title, day })
+      .push()
+      .set({ title, day })
       .then(() => {
         dispatch({ type: REMINDER_CREATED });
       });
