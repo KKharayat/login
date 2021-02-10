@@ -14,7 +14,7 @@ class RouterComponent extends Component {
           <Scene key="auth">
             <Scene key="login" component={Login} title="Please Login" initial />
           </Scene>
-          <Scene key="main">
+          <Scene key="main" hideNavBar>
             <Scene
               rightTitle="Logout"
               onRight={() => Actions.auth()}

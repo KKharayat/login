@@ -13,6 +13,7 @@ import { Feather } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import { connect } from "react-redux";
 import { reminderUpdate, reminderCreate } from "../actions/MainNotes";
+import Header from "./Header";
 
 class Reminder extends Component {
   state = { reminderlist: [] };
@@ -63,54 +64,57 @@ class Reminder extends Component {
 
   render() {
     return (
-      <View style={{ flex: 1 }}>
-        <TextInput
-          placeholder="Set reminder note"
-          style={styles.input}
-          value={this.props.title}
-          onChangeText={(title) =>
-            this.props.reminderUpdate({ prop: "title", value: title })
-          }
-        ></TextInput>
-        <Text style={{ marginHorizontal: 10, marginVertical: 20 }}>
-          Select Day for reminder
-        </Text>
-        <Picker
-          style={styles.picker}
-          selectedValue={this.props.day}
-          onValueChange={(value) => {
-            this.props.reminderUpdate({ prop: "day", value: value });
-          }}
-        >
-          <Picker.Item label="Monday" value="monday" />
-          <Picker.Item label="Tuesday" value="tuesday" />
-          <Picker.Item label="Wednesday" value="wednesday" />
-          <Picker.Item label="Thursday" value="thursday" />
-          <Picker.Item label="Friday" value="friday" />
-          <Picker.Item label="Saturday" value="saturday" />
-          <Picker.Item label="Sunday" value="sunday" />
-        </Picker>
-        <Button title="Add" onPress={this.onButtonPress} />
-        <FlatList
-          keyExtractor={(item) => {
-            item.id;
-          }}
-          data={this.state.reminderlist}
-          renderItem={({ item }) => {
-            return (
-              <View style={styles.view}>
-                <Text style={styles.text}>
-                  {item.title} - {item.day}
-                </Text>
-                <TouchableOpacity
-                  onPress={() => this.onDeleteReminder(item.id)}
-                >
-                  <Feather name="trash" size={20} color="black" />
-                </TouchableOpacity>
-              </View>
-            );
-          }}
-        />
+      <View>
+        <Header title={"Reminder"} />
+        <View>
+          <TextInput
+            placeholder="Set reminder note"
+            style={styles.input}
+            value={this.props.title}
+            onChangeText={(title) =>
+              this.props.reminderUpdate({ prop: "title", value: title })
+            }
+          ></TextInput>
+          <Text style={{ marginHorizontal: 10, marginVertical: 20 }}>
+            Select Day for reminder
+          </Text>
+          <Picker
+            style={styles.picker}
+            selectedValue={this.props.day}
+            onValueChange={(value) => {
+              this.props.reminderUpdate({ prop: "day", value: value });
+            }}
+          >
+            <Picker.Item label="Monday" value="monday" />
+            <Picker.Item label="Tuesday" value="tuesday" />
+            <Picker.Item label="Wednesday" value="wednesday" />
+            <Picker.Item label="Thursday" value="thursday" />
+            <Picker.Item label="Friday" value="friday" />
+            <Picker.Item label="Saturday" value="saturday" />
+            <Picker.Item label="Sunday" value="sunday" />
+          </Picker>
+          <Button title="Add" onPress={this.onButtonPress} />
+          <FlatList
+            keyExtractor={(item) => {
+              item.id;
+            }}
+            data={this.state.reminderlist}
+            renderItem={({ item }) => {
+              return (
+                <View style={styles.view}>
+                  <Text style={styles.text}>
+                    {item.title} - {item.day}
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => this.onDeleteReminder(item.id)}
+                  >
+                    <Feather name="trash" size={20} color="black" />
+                  </TouchableOpacity>
+                </View>
+              );
+            }}
+          />
+        </View>
       </View>
     );
   }
