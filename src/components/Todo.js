@@ -1,25 +1,29 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import firebase from "firebase";
-import { addTodo, changeMessage, todoUpload } from "../actions/MainNotes";
+import {
+  todoUpdate,
+  todoUpload,
+  todosFetch,
+  deleteTodos,
+} from "../actions/MainNotes";
 import {
   View,
   TextInput,
-  Button,
   FlatList,
   Text,
   StyleSheet,
   TouchableOpacity,
-  Dimensions,
   Modal,
 } from "react-native";
 import Header from "./Header";
+import firebase from "firebase";
 
 import { Ionicons } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 import { Feather } from "@expo/vector-icons";
 
+import { windowWidth, windowHeight } from "./FormButtons/Dimensions";
 const numColumns = 2;
-const WIDTH = Dimensions.get("window").width;
 
 class Todo extends Component {
   backgroundColors = [
@@ -43,7 +47,9 @@ class Todo extends Component {
       .on("child_added", (snap) => {
         previousTodos.push({
           id: snap.key,
-          message: snap.val().message,
+          title: snap.val().title,
+          color: snap.val().color,
+          timestamp: snap.timestamp,
         });
         this.setState({
           todolist: previousTodos,
@@ -62,8 +68,13 @@ class Todo extends Component {
             });
           });
       });
+    // console.log(this.state.todolist);
   }
 
+  onButtonPress = () => {
+    const { title, color } = this.props;
+    this.props.todoUpload({ title, color });
+  };
   onDeleteTodo = (id) => {
     const { currentUser } = firebase.auth();
     firebase
@@ -72,14 +83,10 @@ class Todo extends Component {
       .child(id)
       .remove();
   };
-  onTodoChange = (todo) => {
-    this.props.changeMessage(todo);
-  };
-
   _renderItem = ({ item }) => {
     return (
-      <View style={styles.itemBlock}>
-        <Text style={styles.itemText}>{item.message}</Text>
+      <View style={[styles.itemBlock]}>
+        <Text style={styles.itemText}>{item.title}</Text>
         <Ionicons
           name="color-palette-outline"
           size={24}
@@ -94,7 +101,7 @@ class Todo extends Component {
       </View>
     );
   };
-  renderColors() {
+  renderColors = () => {
     return this.backgroundColors.map((color) => {
       return (
         <TouchableOpacity
@@ -106,11 +113,12 @@ class Todo extends Component {
         />
       );
     });
-  }
+  };
   render() {
     return (
-      <View>
+      <View style={{ flex: 1 }}>
         <Header title={"Todo"} />
+
         <View style={styles.container}>
           <Modal
             animationType="slide"
@@ -148,19 +156,6 @@ class Todo extends Component {
             </View>
           </Modal>
 
-          <TextInput
-            value={this.props.todo}
-            onChangeText={this.onTodoChange}
-            placeholder="Add Todos"
-            style={styles.input}
-          />
-          <Button
-            title="Add"
-            onPress={() => {
-              this.props.addTodo(this.props.todo);
-              this.props.todoUpload(this.props.todo);
-            }}
-          />
           <FlatList
             keyExtractor={(item) => {
               item.id;
@@ -170,6 +165,34 @@ class Todo extends Component {
             numColumns={numColumns}
           />
         </View>
+
+        <View
+          style={{
+            flex: 1,
+            width: "100%",
+            flexDirection: "row",
+            marginBottom: 10,
+            paddingHorizontal: 10,
+            position: "absolute",
+            bottom: 0,
+          }}
+        >
+          <TextInput
+            value={this.props.title}
+            onChangeText={(text) => {
+              this.props.todoUpdate({ prop: "title", value: text });
+            }}
+            placeholder="Add Todos"
+            style={styles.input}
+          />
+          <TouchableOpacity
+            style={styles.btn}
+            title="Add"
+            onPress={this.onButtonPress}
+          >
+            <AntDesign name="plus" size={24} color="#C8C8C8" />
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
@@ -178,9 +201,18 @@ const styles = StyleSheet.create({
   input: {
     height: 45,
     marginHorizontal: 10,
+    width: "80%",
     borderBottomWidth: 1,
-    marginBottom: 10,
+    borderBottomColor: "#ccc",
     fontSize: 18,
+  },
+  btn: {
+    padding: 5,
+    fontSize: 8,
+    borderWidth: 1,
+    borderColor: "#ccc",
+
+    height: windowHeight / 15,
   },
 
   container: {
@@ -196,7 +228,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     flex: 1,
     margin: 1,
-    height: WIDTH / numColumns,
+    height: windowWidth / numColumns,
     borderRadius: 8,
   },
   itemText: {
@@ -209,14 +241,13 @@ const styles = StyleSheet.create({
   },
 });
 const mapStateToProps = (state) => {
-  return {
-    todos: state.main.todos,
-    todo: state.main.todo,
-    color: state.main.color,
-  };
+  const { title, color, todos } = state.main;
+  console.log(todos);
+  return { title, color, todos };
 };
 export default connect(mapStateToProps, {
-  addTodo,
-  changeMessage,
+  todoUpdate,
   todoUpload,
+  todosFetch,
+  deleteTodos,
 })(Todo);

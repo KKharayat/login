@@ -1,37 +1,32 @@
 import firebase from "firebase";
 import {
-  ADD_TODO,
-  CHANGE_MESSAGE,
+  TODO_UPLOADED,
+  TODO_UPDATE,
+  TODOS_FETCH_SUCCESS,
   NOTES_UPDATE,
   NOTES_CREATED,
   NOTES_FETCH_SUCCESS,
-  TODO_UPLOADED,
   REMINDER_UPDATE,
   REMINDER_CREATED,
+  COLOR_UPDATE,
+  DELETED,
 } from "./types";
 
-export const changeMessage = (message) => {
+export const todoUpdate = ({ prop, value }) => {
   return {
-    type: CHANGE_MESSAGE,
-    payload: message,
+    type: TODO_UPDATE,
+    payload: { prop, value },
   };
 };
 
-export const addTodo = (message) => {
-  return {
-    type: ADD_TODO,
-    payload: message,
-  };
-};
-
-export const todoUpload = (message) => {
+export const todoUpload = ({ title, color }) => {
   const { currentUser } = firebase.auth();
   return (dispatch) => {
     firebase
       .database()
       .ref(`/users/${currentUser.uid}/todos`)
       .push()
-      .set({ message: message })
+      .set({ title, color })
       .then(() => {
         dispatch({ type: TODO_UPLOADED });
       });
@@ -66,10 +61,27 @@ export const notesFetch = () => {
     firebase
       .database()
       .ref(`/users/${currentUser.uid}/notes`)
-      .on("value", (snapshot) => {
-        dispatch({ type: NOTES_FETCH_SUCCESS, payload: snapshot.val() });
+      .on("value", (snap) => {
+        const previousNotes = [];
+        snap.forEach((snap) => {
+          previousNotes.push({
+            id: snap.key,
+            title: snap.val().title,
+            body: snap.val().body,
+          });
+        });
+
+        dispatch({ type: NOTES_FETCH_SUCCESS, payload: previousNotes });
+
+        // console.log(snap.val());
       });
   };
+};
+
+export const deleteNotes = (id) => {
+  const { currentUser } = firebase.auth();
+  firebase.database().ref(`/users/${currentUser.uid}/notes`).child(id).remove();
+  return { type: DELETED };
 };
 
 //Reminder
@@ -83,6 +95,7 @@ export const reminderUpdate = ({ prop, value }) => {
 
 export const reminderCreate = ({ title, day }) => {
   const { currentUser } = firebase.auth();
+
   return (dispatch) => {
     firebase
       .database()
@@ -91,6 +104,7 @@ export const reminderCreate = ({ title, day }) => {
       .set({ title, day })
       .then(() => {
         dispatch({ type: REMINDER_CREATED });
+        console.log(currentUser);
       });
   };
 };

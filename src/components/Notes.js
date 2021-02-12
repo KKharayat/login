@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import firebase from "firebase";
+import { windowHeight, windowWidth } from "./FormButtons/Dimensions";
 import {
   View,
   TextInput,
@@ -9,7 +9,12 @@ import {
   Text,
   TouchableOpacity,
 } from "react-native";
-import { notesUpdate, noteCreate, notesFetch } from "../actions/MainNotes";
+import {
+  notesUpdate,
+  noteCreate,
+  notesFetch,
+  deleteNotes,
+} from "../actions/MainNotes";
 import { connect } from "react-redux";
 import { Feather } from "@expo/vector-icons";
 import Header from "./Header";
@@ -18,34 +23,7 @@ class Notes extends Component {
   state = { datalist: [] };
 
   componentDidMount() {
-    const previousNotes = this.state.datalist;
-    const { currentUser } = firebase.auth();
-    firebase
-      .database()
-      .ref(`/users/${currentUser.uid}/notes`)
-      .on("child_added", (snap) => {
-        previousNotes.push({
-          id: snap.key,
-          title: snap.val().title,
-          body: snap.val().body,
-        });
-        this.setState({ datalist: previousNotes });
-        firebase
-          .database()
-          .ref(`/users/${currentUser.uid}/notes`)
-          .on("child_removed", (snap) => {
-            for (var i = 0; i < previousNotes.length; i++) {
-              if (previousNotes[i].id === snap.key) {
-                previousNotes.splice(i, 1);
-              }
-            }
-            this.setState({
-              datalist: previousNotes,
-            });
-          });
-      });
-
-    console.log(this.state.datalist);
+    this.props.notesFetch();
   }
 
   onButtonPress = () => {
@@ -54,12 +32,7 @@ class Notes extends Component {
   };
 
   onDeleteNotes = (id) => {
-    const { currentUser } = firebase.auth();
-    firebase
-      .database()
-      .ref(`/users/${currentUser.uid}/notes`)
-      .child(id)
-      .remove();
+    this.props.deleteNotes(id);
   };
 
   render() {
@@ -92,8 +65,9 @@ class Notes extends Component {
             keyExtractor={(item) => {
               item.id;
             }}
-            data={this.state.datalist}
+            data={this.props.notes}
             renderItem={({ item }) => {
+              // console.log(item);
               return (
                 <View style={styles.view}>
                   <Text style={styles.text}>
@@ -127,18 +101,30 @@ const styles = StyleSheet.create({
   view: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginHorizontal: 10,
-    marginVertical: 10,
+
     alignItems: "center",
+    flex: 1,
+    marginTop: 5,
+    marginBottom: 10,
+    width: "100%",
+    height: windowHeight / 15,
+    borderColor: "#ccc",
+    borderRadius: 3,
+    borderWidth: 1,
+
+    alignItems: "center",
+    backgroundColor: "#fff",
   },
 });
 
 const mapStateToProps = (state) => {
-  const { title, body } = state.notes;
-  return { title, body };
+  const { title, body, notes } = state.notes;
+  // console.log(notes);
+  return { title, body, notes };
 };
 export default connect(mapStateToProps, {
   notesUpdate,
   noteCreate,
   notesFetch,
+  deleteNotes,
 })(Notes);
