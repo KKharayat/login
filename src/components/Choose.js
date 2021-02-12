@@ -1,8 +1,12 @@
 import React, { Component } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Button } from "react-native";
 import { Actions } from "react-native-router-flux";
 import Header from "./Header";
 import { MaterialIcons } from "@expo/vector-icons";
+import { connect } from "react-redux";
+import { logoutUser } from "../actions/index";
+import FormButton from "./FormButtons/FormButton";
+import { windowHeight } from "./FormButtons/Dimensions";
 
 class Choose extends Component {
   render() {
@@ -37,6 +41,10 @@ class Choose extends Component {
           >
             Add Reminders
           </Text>
+          <FormButton
+            buttonTitle="Signout"
+            onPress={() => this.props.logoutUser()}
+          />
         </View>
       </View>
     );
@@ -48,13 +56,12 @@ const styles = StyleSheet.create({
     fontSize: 26,
     marginVertical: 10,
     borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
   },
   view: {
     flex: 1,
-
     marginHorizontal: 10,
-    marginTop: 10,
-    alignItems: "center",
   },
 });
-export default Choose;
+
+export default connect(null, { logoutUser })(Choose);

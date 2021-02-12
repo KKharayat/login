@@ -9,10 +9,12 @@ export const DELETE_TODO = "delete_todo";
 export const TODO_UPLOADED = "todo_uploaded";
 export const TODO_UPDATE = "todo_update";
 export const TODOS_FETCH_SUCCESS = "todo_fetch_success";
+export const COLOR_UPDATE = "color_update";
 
 export const NOTES_UPDATE = "notes_update";
 export const NOTES_CREATED = "notes_created";
 export const NOTES_FETCH_SUCCESS = "notes_fetch_success";
+export const DELETED = "deleted";
 
 export const REMINDER_UPDATE = "reminder_update";
 export const REMINDER_CREATED = "reminder_created";

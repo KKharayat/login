@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { emailChanged, passwordChanged, loginUser } from "../actions/index";
 import { Button, TextInput, View, StyleSheet, Text } from "react-native";
+import FormButton from "./FormButtons/FormButton";
+import FormInput from "./FormButtons/FormInput";
 
 class Login extends Component {
   onEmailChange = (text) => {
@@ -20,7 +22,7 @@ class Login extends Component {
     if (this.props.loading) {
       return <Text style={styles.loading}>Loading..</Text>;
     }
-    return <Button onPress={this.onButtonPress} title="Log in" />;
+    return <FormButton buttonTitle="Log in" onPress={this.onButtonPress} />;
   };
   renderError() {
     if (this.props.error) {
@@ -33,28 +35,27 @@ class Login extends Component {
   }
   render() {
     return (
-      <View
-        style={{
-          paddingTop: 40,
-          justifyContent: "center",
-        }}
-      >
-        <TextInput
-          autoCapitalize="none"
-          placeholder="Enter Email"
-          onChangeText={this.onEmailChange}
-          value={this.props.email}
-          style={styles.input}
-        />
+      <View style={styles.container}>
+        <View>
+          <Text style={styles.text}>Todo App</Text>
+          <FormInput
+            value={this.props.email}
+            onChangeText={this.onEmailChange}
+            placeholder="Enter Email"
+            icon="user"
+            autoCapitalize="none"
+          />
 
-        <TextInput
-          secureTextEntry
-          autoCapitalize="none"
-          placeholder="Enter Password"
-          value={this.props.password}
-          onChangeText={this.onPasswordChange}
-          style={styles.input}
-        />
+          <FormInput
+            value={this.props.password}
+            onChangeText={this.onPasswordChange}
+            placeholder="Enter Password"
+            icon="lock"
+            secureTextEntry={true}
+            autoCapitalize="none"
+          />
+        </View>
+
         {this.renderButton()}
         {this.renderError()}
       </View>
@@ -63,14 +64,16 @@ class Login extends Component {
 }
 
 const styles = StyleSheet.create({
-  input: {
-    color: "#000",
-    marginHorizontal: 10,
-    height: 50,
-    borderBottomWidth: 2,
-    padding: 5,
-    borderBottomColor: "black",
-    marginBottom: 20,
+  container: {
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+    paddingTop: 50,
+  },
+  text: {
+    fontSize: 28,
+    marginBottom: 10,
+    color: "#051d5f",
   },
   error: {
     fontSize: 20,

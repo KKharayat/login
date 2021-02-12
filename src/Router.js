@@ -14,12 +14,7 @@ class RouterComponent extends Component {
         <Scene key="root" hideNavBar>
           {!this.props.user && (
             <Scene key="auth">
-              <Scene
-                key="login"
-                component={Login}
-                title="Please Login"
-                initial
-              />
+              <Scene key="login" component={Login} initial />
             </Scene>
           )}
           {this.props.user && (

@@ -26,7 +26,8 @@ const styles = StyleSheet.create({
   header: {
     height: 60,
     marginTop: 20,
-    backgroundColor: "#F8F8F8",
+    backgroundColor: "#f9fafd",
+    shadowColor: "#f9fafd",
     alignItems: "center",
     justifyContent: "center",
     borderBottomWidth: 1,
